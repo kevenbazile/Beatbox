@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Producer DAW - Prompt to Beat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .main-section {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+        }
+        
+        .prompt-section {
+            margin-bottom: 30px;
+        }
+        
+        .prompt-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            resize: vertical;
+            min-height: 60px;
+        }
+        
+        .generate-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-right: 10px;
+        }
+        
+        .generate-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .generate-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .examples-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .examples-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .status.success {
+            background: rgba(46, 204, 113, 0.2);
+            border: 1px solid #2ecc71;
+        }
+        
+        .status.error {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid #e74c3c;
+        }
+        
+        .status.loading {
+            background: rgba(52, 152, 219, 0.2);
+            border: 1px solid #3498db;
+            display: flex;
+            align-items: center;
+        }
+        
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffffff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .beats-list {
+            margin-top: 30px;
+        }
+        
+        .beat-item {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #ff6b6b;
+        }
+        
+        .beat-prompt {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .beat-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .beat-info {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        
+        .download-btn {
+            background: #2ecc71;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background 0.2s;
+        }
+        
+        .download-btn:hover {
+            background: #27ae60;
+        }
+        
+        .examples-list {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        .example-item {
+            background: rgba(255,255,255,0.1);
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .example-item:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎵 AI Producer DAW</h1>
+            <p>Transform your ideas into beats with natural language</p>
+        </div>
+        
+        <div class="main-section">
+            <div class="prompt-section">
+                <textarea 
+                    id="promptInput" 
+                    class="prompt-input" 
+                    placeholder="Enter your beat prompt here... e.g., 'dark trap beat with heavy 808s at 140 BPM'"
+                ></textarea>
+                
+                <div>
+                    <button id="generateBtn" class="generate-btn">🎹 Generate Beat</button>
+                    <button id="examplesBtn" class="examples-btn">💡 Show Examples</button>
+                </div>
+                
+                <div id="examplesList" class="examples-list"></div>
+            </div>
+            
+            <div id="status" class="status"></div>
+        </div>
+        
+        <div class="main-section">
+            <h2>🎵 Generated Beats</h2>
+            <div id="beatsList" class="beats-list">
+                <p style="opacity: 0.6;">No beats generated yet. Try creating one above!</p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Built with Python, Flask, and AI magic ✨</p>
+        </div>
+    </div>
+
+    <script>
+        const promptInput = document.getElementById('promptInput');
+        const generateBtn = document.getElementById('generateBtn');
+        const examplesBtn = document.getElementById('examplesBtn');
+        const examplesList = document.getElementById('examplesList');
+        const status = document.getElementById('status');
+        const beatsList = document.getElementById('beatsList');
+        
+        let examples = [];
+        
+        // Load examples
+        fetch('/examples')
+            .then(response => response.json())
+            .then(data => {
+                examples = data.examples;
+                renderExamples();
+            });
+        
+        function renderExamples() {
+            examplesList.innerHTML = examples.map(example => 
+                `<div class="example-item" onclick="selectExample('${example}')">${example}</div>`
+            ).join('');
+        }
+        
+        function selectExample(example) {
+            promptInput.value = example;
+            examplesList.style.display = 'none';
+        }
+        
+        examplesBtn.addEventListener('click', () => {
+            const isVisible = examplesList.style.display === 'block';
+            examplesList.style.display = isVisible ? 'none' : 'block';
+        });
+        
+        generateBtn.addEventListener('click', generateBeat);
+        
+        promptInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                generateBeat();
+            }
+        });
+        
+        function showStatus(message, type) {
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+            
+            if (type === 'loading') {
+                status.innerHTML = `<div class="spinner"></div>${message}`;
+            } else {
+                status.innerHTML = message;
+            }
+            
+            if (type !== 'loading') {
+                setTimeout(() => {
+                    status.style.display = 'none';
+                }, 5000);
+            }
+        }
+        
+        function generateBeat() {
+            const prompt = promptInput.value.trim();
+            
+            if (!prompt) {
+                showStatus('Please enter a prompt!', 'error');
+                return;
+            }
+            
+            generateBtn.disabled = true;
+            showStatus('Generating your beat... This may take a few seconds', 'loading');
+            
+            fetch('/generate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ prompt: prompt })
+            })
+            .then(response => response.json())
+            .then(data => {
+                generateBtn.disabled = false;
+                
+                if (data.success) {
+                    showStatus(`✅ ${data.message}`, 'success');
+                    loadBeats();
+                    promptInput.value = '';
+                } else {
+                    showStatus(`❌ Error: ${data.error}`, 'error');
+                }
+            })
+            .catch(error => {
+                generateBtn.disabled = false;
+                showStatus(`❌ Error: ${error.message}`, 'error');
+            });
+        }
+        
+        function loadBeats() {
+            fetch('/beats')
+                .then(response => response.json())
+                .then(data => {
+                    renderBeats(data.beats);
+                });
+        }
+        
+        function renderBeats(beats) {
+            if (beats.length === 0) {
+                beatsList.innerHTML = '<p style="opacity: 0.6;">No beats generated yet. Try creating one above!</p>';
+                return;
+            }
+            
+            beatsList.innerHTML = beats.map(beat => `
+                <div class="beat-item">
+                    <div class="beat-prompt">"${beat.prompt}"</div>
+                    <div class="beat-details">
+                        <div class="beat-info">
+                            ${beat.params.genre} | ${beat.params.bpm} BPM | ${beat.params.bars} bars | 
+                            ${new Date(beat.timestamp).toLocaleString()}
+                        </div>
+                        <button class="download-btn" onclick="downloadBeat('${beat.filename}')">
+                            ⬇️ Download
+                        </button>
+                    </div>
+                </div>
+            `).reverse().join('');
+        }
+        
+        function downloadBeat(filename) {
+            window.location.href = `/download/${filename}`;
+        }
+        
+        // Load existing beats on page load
+        loadBeats();
+    </script>
+</body>
+</html>

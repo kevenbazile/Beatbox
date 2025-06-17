@@ -1,0 +1,22 @@
+{
+  "session_name": "session_20250617_101213",
+  "created": "2025-06-17T10:15:13.234498",
+  "beats": [
+    {
+      "prompt": "sheff g type beat",
+      "filename": "ai_beat_trap_140bpm.wav",
+      "params": {
+        "genre": "trap",
+        "bpm": 140,
+        "bars": 4,
+        "mood": "neutral",
+        "kick_pattern": "standard",
+        "hihat_style": "standard",
+        "bass_boost": 1.0,
+        "distortion": 0.3,
+        "volume": 1.0
+      },
+      "timestamp": "2025-06-17T10:12:32.629469"
+    }
+  ]
+}
