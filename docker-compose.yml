@@ -1,0 +1,10 @@
+services:
+  ai-music-generator:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./generated_songs:/app/generated_songs
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped

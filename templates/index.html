@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Producer DAW - Prompt to Beat</title>
+    <title>AI Music Generator</title>
     <style>
         * {
             margin: 0;
@@ -12,14 +12,14 @@
         }
         
         body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             min-height: 100vh;
             color: white;
         }
         
         .container {
-            max-width: 1000px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
@@ -30,53 +30,85 @@
         }
         
         .header h1 {
-            font-size: 3em;
+            font-size: 3.5em;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
         
-        .header p {
-            font-size: 1.2em;
-            opacity: 0.9;
+        .capability-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin: 10px 5px;
+        }
+        
+        .full-songs {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+        }
+        
+        .beats-only {
+            background: linear-gradient(45deg, #ff9800, #f57c00);
         }
         
         .main-section {
             background: rgba(255,255,255,0.1);
             border-radius: 20px;
             padding: 30px;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(15px);
             margin-bottom: 30px;
-        }
-        
-        .prompt-section {
-            margin-bottom: 30px;
+            border: 1px solid rgba(255,255,255,0.2);
         }
         
         .prompt-input {
             width: 100%;
-            padding: 15px;
+            padding: 18px;
             font-size: 1.1em;
             border: none;
-            border-radius: 10px;
-            margin-bottom: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
             resize: vertical;
-            min-height: 60px;
+            min-height: 80px;
+            background: rgba(255,255,255,0.9);
+            color: #333;
+        }
+        
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .control-input {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.9);
+            color: #333;
         }
         
         .generate-btn {
             background: linear-gradient(45deg, #ff6b6b, #ee5a24);
             color: white;
             border: none;
-            padding: 15px 30px;
-            font-size: 1.1em;
-            border-radius: 10px;
+            padding: 18px 40px;
+            font-size: 1.2em;
+            border-radius: 12px;
             cursor: pointer;
-            transition: transform 0.2s;
-            margin-right: 10px;
+            transition: all 0.3s ease;
+            margin-right: 15px;
         }
         
         .generate-btn:hover {
             transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
         }
         
         .generate-btn:disabled {
@@ -84,26 +116,35 @@
             cursor: not-allowed;
         }
         
-        .examples-btn {
+        .preset-btn {
             background: rgba(255,255,255,0.2);
             color: white;
             border: 1px solid rgba(255,255,255,0.3);
-            padding: 15px 30px;
-            font-size: 1.1em;
-            border-radius: 10px;
+            padding: 10px 20px;
+            border-radius: 20px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s;
+            margin: 5px;
+            font-size: 0.9em;
         }
         
-        .examples-btn:hover {
+        .preset-btn:hover {
             background: rgba(255,255,255,0.3);
         }
         
         .status {
-            margin: 20px 0;
-            padding: 15px;
-            border-radius: 10px;
+            margin: 25px 0;
+            padding: 20px;
+            border-radius: 12px;
             display: none;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .status.loading {
+            background: rgba(52, 152, 219, 0.2);
+            border: 1px solid #3498db;
+            display: flex;
         }
         
         .status.success {
@@ -116,21 +157,13 @@
             border: 1px solid #e74c3c;
         }
         
-        .status.loading {
-            background: rgba(52, 152, 219, 0.2);
-            border: 1px solid #3498db;
-            display: flex;
-            align-items: center;
-        }
-        
         .spinner {
-            width: 20px;
-            height: 20px;
-            border: 2px solid #ffffff;
-            border-top: 2px solid transparent;
+            width: 24px;
+            height: 24px;
+            border: 3px solid #ffffff;
+            border-top: 3px solid transparent;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-right: 10px;
         }
         
         @keyframes spin {
@@ -138,233 +171,272 @@
             100% { transform: rotate(360deg); }
         }
         
-        .beats-list {
+        .songs-list {
             margin-top: 30px;
         }
         
-        .beat-item {
+        .song-item {
             background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 15px;
-            border-left: 4px solid #ff6b6b;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-left: 5px solid #ff6b6b;
         }
         
-        .beat-prompt {
-            font-size: 1.1em;
-            margin-bottom: 10px;
-            font-weight: bold;
-        }
-        
-        .beat-details {
+        .song-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
+            margin-bottom: 15px;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 15px;
         }
         
-        .beat-info {
-            font-size: 0.9em;
-            opacity: 0.8;
+        .song-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .song-type {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin-bottom: 10px;
+        }
+        
+        .full-song-type {
+            background: #4CAF50;
+        }
+        
+        .beat-type {
+            background: #ff9800;
         }
         
         .download-btn {
             background: #2ecc71;
             color: white;
             border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
+            padding: 10px 20px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 0.9em;
             transition: background 0.2s;
         }
         
         .download-btn:hover {
             background: #27ae60;
         }
-        
-        .examples-list {
-            display: none;
-            margin-top: 20px;
-        }
-        
-        .example-item {
-            background: rgba(255,255,255,0.1);
-            padding: 10px 15px;
-            margin: 5px 0;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        
-        .example-item:hover {
-            background: rgba(255,255,255,0.2);
-        }
-        
-        .footer {
-            text-align: center;
-            margin-top: 40px;
-            opacity: 0.7;
-        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎵 AI Producer DAW</h1>
-            <p>Transform your ideas into beats with natural language</p>
+            <h1>🎵 AI Music Generator</h1>
+            <p>Create full songs and beats with artificial intelligence</p>
+            <div id="capabilityBadge"></div>
         </div>
         
         <div class="main-section">
             <div class="prompt-section">
+                <label class="prompt-label">🎯 Describe Your Music</label>
                 <textarea 
                     id="promptInput" 
                     class="prompt-input" 
-                    placeholder="Enter your beat prompt here... e.g., 'dark trap beat with heavy 808s at 140 BPM'"
+                    placeholder="Describe the song you want... e.g., 'upbeat pop rock like Beat It by Michael Jackson' or 'dark drill beat like Sleepy Hallow'"
                 ></textarea>
                 
-                <div>
-                    <button id="generateBtn" class="generate-btn">🎹 Generate Beat</button>
-                    <button id="examplesBtn" class="examples-btn">💡 Show Examples</button>
+                <div id="artistPresets" class="artist-presets"></div>
+                
+                <div class="controls-grid">
+                    <div class="control-group">
+                        <label>Duration (seconds)</label>
+                        <input type="number" id="duration" class="control-input" value="30" min="10" max="60">
+                    </div>
                 </div>
                 
-                <div id="examplesList" class="examples-list"></div>
+                <div>
+                    <button id="generateBtn" class="generate-btn">🎵 Generate Music</button>
+                    <button id="examplesBtn" class="preset-btn">💡 Examples</button>
+                </div>
+                
+                <div id="examplesList" style="display: none; margin-top: 20px;"></div>
             </div>
             
             <div id="status" class="status"></div>
         </div>
         
         <div class="main-section">
-            <h2>🎵 Generated Beats</h2>
-            <div id="beatsList" class="beats-list">
-                <p style="opacity: 0.6;">No beats generated yet. Try creating one above!</p>
+            <h2 id="songsTitle">🎵 Generated Music</h2>
+            <div id="songsList" class="songs-list">
+                <p style="opacity: 0.6; text-align: center; padding: 40px;">
+                    No music generated yet. Create your first track above! 🎼
+                </p>
             </div>
-        </div>
-        
-        <div class="footer">
-            <p>Built with Python, Flask, and AI magic ✨</p>
         </div>
     </div>
 
     <script>
-        const promptInput = document.getElementById('promptInput');
-        const generateBtn = document.getElementById('generateBtn');
-        const examplesBtn = document.getElementById('examplesBtn');
-        const examplesList = document.getElementById('examplesList');
-        const status = document.getElementById('status');
-        const beatsList = document.getElementById('beatsList');
-        
+        let fullSongsAvailable = false;
         let examples = [];
         
-        // Load examples
-        fetch('/examples')
+        // Check capabilities on load
+        fetch('/capability')
             .then(response => response.json())
             .then(data => {
-                examples = data.examples;
-                renderExamples();
+                fullSongsAvailable = data.full_songs_available;
+                updateUI();
+                loadExamples();
             });
         
+        function updateUI() {
+            const badge = document.getElementById('capabilityBadge');
+            const placeholder = document.getElementById('promptInput');
+            const title = document.getElementById('songsTitle');
+            const presets = document.getElementById('artistPresets');
+            
+            if (fullSongsAvailable) {
+                badge.innerHTML = '<span class="capability-badge full-songs">🎵 Full Song Generation Enabled</span>';
+                placeholder.placeholder = "Describe the song you want... e.g., 'upbeat pop rock like Beat It by Michael Jackson' or 'dark drill beat like Sleepy Hallow'";
+                title.textContent = '🎵 Generated Songs';
+                
+                // Add artist presets
+                presets.innerHTML = `
+                    <button class="preset-btn" onclick="setArtistPrompt('michael jackson')">🕺 Michael Jackson Style</button>
+                    <button class="preset-btn" onclick="setArtistPrompt('sleepy hallow')">🎤 Sleepy Hallow Style</button>
+                    <button class="preset-btn" onclick="setArtistPrompt('drake')">🎵 Drake Style</button>
+                `;
+            } else {
+                badge.innerHTML = '<span class="capability-badge beats-only">🥁 Beat Generation Only</span><br><small>Install audiocraft for full songs</small>';
+                placeholder.placeholder = "Describe the beat you want... e.g., 'dark trap beat with heavy 808s'";
+                title.textContent = '🥁 Generated Beats';
+                presets.innerHTML = '';
+            }
+        }
+        
+        function loadExamples() {
+            fetch('/examples')
+                .then(response => response.json())
+                .then(data => {
+                    examples = data.examples;
+                    renderExamples();
+                });
+        }
+        
         function renderExamples() {
-            examplesList.innerHTML = examples.map(example => 
-                `<div class="example-item" onclick="selectExample('${example}')">${example}</div>`
+            const list = document.getElementById('examplesList');
+            list.innerHTML = examples.map(example => 
+                `<div class="preset-btn" onclick="selectExample('${example}')" style="display: block; margin: 5px 0;">${example}</div>`
             ).join('');
         }
         
-        function selectExample(example) {
-            promptInput.value = example;
-            examplesList.style.display = 'none';
+        function setArtistPrompt(artist) {
+            const input = document.getElementById('promptInput');
+            if (artist === 'michael jackson') {
+                input.value = 'upbeat pop rock song like Beat It by Michael Jackson with funky bassline and electric guitar';
+            } else if (artist === 'sleepy hallow') {
+                input.value = 'dark drill beat like Sleepy Hallow with heavy 808s and menacing melody';
+            } else if (artist === 'drake') {
+                input.value = 'melodic hip hop like Drake with atmospheric production and soft piano';
+            }
         }
         
-        examplesBtn.addEventListener('click', () => {
-            const isVisible = examplesList.style.display === 'block';
-            examplesList.style.display = isVisible ? 'none' : 'block';
+        function selectExample(example) {
+            document.getElementById('promptInput').value = example;
+            document.getElementById('examplesList').style.display = 'none';
+        }
+        
+        document.getElementById('examplesBtn').addEventListener('click', () => {
+            const list = document.getElementById('examplesList');
+            list.style.display = list.style.display === 'none' ? 'block' : 'none';
         });
         
-        generateBtn.addEventListener('click', generateBeat);
-        
-        promptInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && e.ctrlKey) {
-                generateBeat();
-            }
-        });
+        document.getElementById('generateBtn').addEventListener('click', generateMusic);
         
         function showStatus(message, type) {
+            const status = document.getElementById('status');
             status.className = `status ${type}`;
-            status.style.display = 'block';
+            status.style.display = type === 'loading' ? 'flex' : 'block';
             
             if (type === 'loading') {
                 status.innerHTML = `<div class="spinner"></div>${message}`;
             } else {
                 status.innerHTML = message;
-            }
-            
-            if (type !== 'loading') {
-                setTimeout(() => {
-                    status.style.display = 'none';
-                }, 5000);
+                if (type !== 'loading') {
+                    setTimeout(() => status.style.display = 'none', 5000);
+                }
             }
         }
         
-        function generateBeat() {
-            const prompt = promptInput.value.trim();
+        function generateMusic() {
+            const prompt = document.getElementById('promptInput').value.trim();
+            const duration = document.getElementById('duration').value;
             
             if (!prompt) {
                 showStatus('Please enter a prompt!', 'error');
                 return;
             }
             
-            generateBtn.disabled = true;
-            showStatus('Generating your beat... This may take a few seconds', 'loading');
+            const btn = document.getElementById('generateBtn');
+            btn.disabled = true;
+            
+            const loadingMsg = fullSongsAvailable ? 
+                'Generating your song... This may take 1-3 minutes' : 
+                'Generating your beat... This may take a few seconds';
+            
+            showStatus(loadingMsg, 'loading');
             
             fetch('/generate', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ prompt: prompt })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt, duration })
             })
             .then(response => response.json())
             .then(data => {
-                generateBtn.disabled = false;
-                
+                btn.disabled = false;
                 if (data.success) {
                     showStatus(`✅ ${data.message}`, 'success');
-                    loadBeats();
-                    promptInput.value = '';
+                    loadSongs();
+                    document.getElementById('promptInput').value = '';
                 } else {
                     showStatus(`❌ Error: ${data.error}`, 'error');
                 }
             })
             .catch(error => {
-                generateBtn.disabled = false;
+                btn.disabled = false;
                 showStatus(`❌ Error: ${error.message}`, 'error');
             });
         }
         
-        function loadBeats() {
-            fetch('/beats')
+        function loadSongs() {
+            fetch('/songs')
                 .then(response => response.json())
-                .then(data => {
-                    renderBeats(data.beats);
-                });
+                .then(data => renderSongs(data.songs));
         }
         
-        function renderBeats(beats) {
-            if (beats.length === 0) {
-                beatsList.innerHTML = '<p style="opacity: 0.6;">No beats generated yet. Try creating one above!</p>';
+        function renderSongs(songs) {
+            const list = document.getElementById('songsList');
+            
+            if (songs.length === 0) {
+                list.innerHTML = '<p style="opacity: 0.6; text-align: center; padding: 40px;">No music generated yet. Create your first track above! 🎼</p>';
                 return;
             }
             
-            beatsList.innerHTML = beats.map(beat => `
-                <div class="beat-item">
-                    <div class="beat-prompt">"${beat.prompt}"</div>
-                    <div class="beat-details">
-                        <div class="beat-info">
-                            ${beat.params.genre} | ${beat.params.bpm} BPM | ${beat.params.bars} bars | 
-                            ${new Date(beat.timestamp).toLocaleString()}
+            list.innerHTML = songs.map(song => `
+                <div class="song-item">
+                    <div class="song-header">
+                        <div>
+                            <div class="song-title">"${song.prompt}"</div>
+                            <span class="song-type ${song.params.type === 'full_song' ? 'full-song-type' : 'beat-type'}">
+                                ${song.params.type === 'full_song' ? '🎵 Full Song' : '🥁 Beat Only'}
+                            </span>
+                            <div style="font-size: 0.9em; opacity: 0.8; margin-top: 10px;">
+                                ${song.params.genre ? `${song.params.genre} | ` : ''}
+                                ${song.params.duration ? `${song.params.duration}s | ` : ''}
+                                ${new Date(song.timestamp).toLocaleString()}
+                            </div>
                         </div>
-                        <button class="download-btn" onclick="downloadBeat('${beat.filename}')">
+                        <button class="download-btn" onclick="downloadSong('${song.filename}')">
                             ⬇️ Download
                         </button>
                     </div>
@@ -372,12 +444,12 @@
             `).reverse().join('');
         }
         
-        function downloadBeat(filename) {
+        function downloadSong(filename) {
             window.location.href = `/download/${filename}`;
         }
         
-        // Load existing beats on page load
-        loadBeats();
+        // Load existing songs on page load
+        loadSongs();
     </script>
 </body>
 </html>
