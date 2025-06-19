@@ -272,11 +272,11 @@ HTML_TEMPLATE = '''
                     } else {
                         indicator.className = 'ready-indicator not-ready';
                         text.textContent = 'Loading AI Model...';
-                        setTimeout(checkGeneratorStatus, 3000); // Check again in 3 seconds
+                        setTimeout(checkGeneratorStatus, 3000);
                     }
                 })
                 .catch(() => {
-                    setTimeout(checkGeneratorStatus, 5000); // Retry in 5 seconds
+                    setTimeout(checkGeneratorStatus, 5000);
                 });
         }
         
@@ -302,6 +302,10 @@ HTML_TEMPLATE = '''
             
             showStatus(`🎵 Generating ${style} song... This may take 2-5 minutes...`, 'loading');
             
+            // Disable all buttons during generation
+            const buttons = document.querySelectorAll('.btn, .btn-style');
+            buttons.forEach(btn => btn.disabled = true);
+            
             fetch('/generate', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -309,6 +313,9 @@ HTML_TEMPLATE = '''
             })
             .then(response => response.json())
             .then(data => {
+                // Re-enable buttons
+                buttons.forEach(btn => btn.disabled = false);
+                
                 if (data.success) {
                     showStatus(`✅ ${data.message}`, 'success');
                     loadSongs();
@@ -317,6 +324,8 @@ HTML_TEMPLATE = '''
                 }
             })
             .catch(error => {
+                // Re-enable buttons on error
+                buttons.forEach(btn => btn.disabled = false);
                 showStatus(`❌ Error: ${error}`, 'error');
             });
         }
@@ -327,7 +336,45 @@ HTML_TEMPLATE = '''
                 showStatus('Please enter a song description!', 'error');
                 return;
             }
-            generateSong(prompt, 'custom');
+            
+            if (!generatorReady) {
+                showStatus('⏳ AI model is still loading. Please wait...', 'warning');
+                return;
+            }
+            
+            const duration = document.getElementById('duration').value;
+            
+            showStatus(`🎵 Generating custom song... This may take 2-5 minutes...`, 'loading');
+            
+            // Disable all buttons during generation
+            const buttons = document.querySelectorAll('.btn, .btn-style');
+            buttons.forEach(btn => btn.disabled = true);
+            
+            fetch('/generate', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({prompt: prompt, duration: parseInt(duration), style: 'custom'})
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Re-enable buttons
+                buttons.forEach(btn => btn.disabled = false);
+                
+                if (data.success) {
+                    showStatus(`✅ ${data.message}`, 'success');
+                    loadSongs();
+                    // Clear the input after successful generation
+                    document.getElementById('promptInput').value = '';
+                } else {
+                    showStatus(`❌ Error: ${data.error}`, 'error');
+                }
+            })
+            .catch(error => {
+                // Re-enable buttons on error
+                buttons.forEach(btn => btn.disabled = false);
+                showStatus(`❌ Error: ${error}`, 'error');
+                console.error('Generation error:', error);
+            });
         }
         
         function generateMJ() {
